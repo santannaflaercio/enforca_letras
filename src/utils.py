@@ -1,33 +1,18 @@
-def ler_palavras():
-    # Inicializa um conjunto vazio para armazenar as palavras
-    palavras = set()
+def read_words():
     try:
-        # Abre o arquivo de palavras no modo de leitura
-        with open("data/palavras.txt", "r") as arquivo:
-            # Usa uma compreensão de conjunto para ler as palavras do arquivo
-            # e remover espaços em branco extras com o método strip()
-            palavras = {palavra.strip() for palavra in arquivo}
+        with open("../data/wordlist.txt", "r") as file:
+            return {word.strip() for word in file}
     except FileNotFoundError:
-        # Imprime uma mensagem de erro se o arquivo não for encontrado
-        print("Erro: Arquivo 'palavras.txt' não encontrado.")
+        print("Error: File 'wordlist.txt' not found.")
         raise
     except Exception as e:
-        # Imprime uma mensagem de erro se ocorrer qualquer outra exceção ao ler o arquivo
-        print(f"Erro ao ler o arquivo 'palavras.txt': {e}")
+        print(f"Error reading file 'wordlist.txt': {e}")
         raise
-    finally:
-        # Retorna o conjunto de palavras, mesmo que uma exceção tenha ocorrido
-        return palavras
 
 
-def mostra_jogo(palavra_escolhida, letras_usadas, erros):
-    # Mostra a palavra com as letras acertadas
-    palavra_com_acertos = "".join(letra if letra in letras_usadas else "_" for letra in palavra_escolhida)
-
+def display_game(chosen_word, used_letters, mistakes):
+    guessed_word = "".join(letter if letter in used_letters else "_" for letter in chosen_word)
     print("--------------------")
-    # Mostra o número de erros
-    print(f"Erros: {erros}")
-    # Mostra a palavra com as letras acertadas
-    print(f"Palavra: {palavra_com_acertos}")
-    # Mostra as letras usadas
-    print(f"Letras usadas: {' '.join(sorted(letras_usadas))}")
+    print(f"Mistakes: {mistakes}")
+    print(f"Word: {guessed_word}")
+    print(f"Used letters: {' '.join(sorted(used_letters))}")

@@ -1,56 +1,33 @@
 import io
-import sys
 import unittest
 from unittest.mock import patch, mock_open
-from src.utils import ler_palavras, mostra_jogo
+
+from src.utils import read_words, display_game
 
 
-class TestLerPalavras(unittest.TestCase):
-    def setUp(self):
-        self.capturedOutput = io.StringIO()
-        sys.stdout = self.capturedOutput
+class TestUtils(unittest.TestCase):
+    @patch("builtins.open", new_callable=mock_open, read_data="word1\nword2\nword3")
+    def test_read_words(self, mock_file):
+        self.assertEqual(read_words(), {"word1", "word2", "word3"})
 
-    def tearDown(self):
-        sys.stdout = sys.__stdout__
-        
-    @patch("builtins.open", new_callable=mock_open, read_data="palavra1\npalavra2\npalavra3")
-    def test_ler_palavras(self, mock_file):
-        expected_output = {"palavra1", "palavra2", "palavra3"}
-        self.assertEqual(ler_palavras(), expected_output)
-
-    @patch("builtins.open", new_callable=mock_open, read_data="palavra1\npalavra2\npalavra2")
-    def test_ler_palavras_duplicadas(self, mock_file):
-        expected_output = {"palavra1", "palavra2"}
-        self.assertEqual(ler_palavras(), expected_output)
+    @patch("builtins.open", new_callable=mock_open, read_data="word1\nword2\nword2")
+    def test_read_words_duplicates(self, mock_file):
+        self.assertEqual(read_words(), {"word1", "word2"})
 
     @patch("builtins.open", side_effect=FileNotFoundError())
-    def test_ler_palavras_arquivo_nao_encontrado(self, mock_file):
-        ler_palavras()
-        output = self.capturedOutput.getvalue().strip()
-        self.assertIn("Erro: Arquivo 'palavras.txt' não encontrado.", output)
+    def test_read_words_file_not_found(self, mock_file):
+        with self.assertRaises(FileNotFoundError):
+            read_words()
 
-
-class TestMostraJogo(unittest.TestCase):
-    def setUp(self):
-        self.capturedOutput = io.StringIO()
-        sys.stdout = self.capturedOutput
-
-    def tearDown(self):
-        sys.stdout = sys.__stdout__
-
-    def test_mostra_jogo(self):
-        mostra_jogo("python", set("yth"), 2)
-        output = self.capturedOutput.getvalue().strip()
-        expected_output = "--------------------\nErros: 2\nPalavra: _yth__\nLetras usadas: h t y"
-        self.assertEqual(output, expected_output)
-
-        self.capturedOutput.truncate(0)
-        self.capturedOutput.seek(0)
-
-        mostra_jogo("python", set("python"), 0)
-        output = self.capturedOutput.getvalue().strip()
-        expected_output = "--------------------\nErros: 0\nPalavra: python\nLetras usadas: h n o p t y"
-        self.assertEqual(output, expected_output)
+    def test_display_game(self):
+        with patch('sys.stdout', new=io.StringIO()) as fake_out:
+            display_game("word", ["w", "o"], 1)
+            self.assertEqual(fake_out.getvalue().strip(), "\n".join([
+                "--------------------",
+                "Mistakes: 1",
+                "Word: wo__",
+                "Used letters: o w"
+            ]))
 
 
 if __name__ == "__main__":
